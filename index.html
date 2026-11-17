@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Date ESP32</title>
-    <!-- Bibliotecă MQTT pentru browser -->
+    <title>Monitorizare ESP32</title>
     <script src="https://unpkg.com"></script>
     <style>
         body {
@@ -17,16 +16,16 @@
             height: 100vh;
             margin: 0;
         }
-        .dashboard {
+        .card {
             background-color: #1e293b;
             padding: 35px;
             border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
             text-align: center;
             width: 320px;
             border: 1px solid #334155;
         }
-        .status-badge {
+        .status {
             display: inline-block;
             padding: 5px 12px;
             border-radius: 20px;
@@ -37,7 +36,7 @@
             margin-bottom: 20px;
         }
         .titlu {
-            font-size: 15px;
+            font-size: 14px;
             color: #94a3b8;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -56,18 +55,18 @@
 </head>
 <body>
 
-    <div class="dashboard">
-        <div id="status" class="status-badge">Se conectează...</div>
+    <div class="card">
+        <div id="status" class="status">Se conectează...</div>
         <div class="titlu">Informație ESP32</div>
         <div id="valoare-esp" class="valoare">--</div>
-        <div id="ora-update" class="timp">Nicio dată primită încă</div>
+        <div id="ora-update" class="timp">Așteptare date...</div>
     </div>
 
     <script>
-        // IMPORTANT: Schimbă 'proiect_esp32_unic_123' cu un nume ales de tine!
-        const topic = 'proiect_esp32_unic_123/date';
+        // Folosim un topic secret (schimbă câteva litere/cifre ca să fie doar al tău)
+        const topic = 'esp32_ro_94827165_secret/date';
 
-        // Conectare securizată (WSS) necesară pentru site-urile HTTPS de pe GitHub
+        // Server public gratuit, fără cont și fără card
         const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
 
         const statusEl = document.getElementById('status');
@@ -75,21 +74,19 @@
         const oraEl = document.getElementById('ora-update');
 
         client.on('connect', () => {
-            statusEl.innerText = '● Online (Conectat)';
+            statusEl.innerText = '● Conectat (Gratuit)';
             statusEl.style.color = '#4ade80';
             client.subscribe(topic);
         });
 
         client.on('message', (topicPrimit, mesaj) => {
-            // Afișează textul sau numărul trimis de ESP32
             valoareEl.innerText = mesaj.toString();
-            
             const acum = new Date();
             oraEl.innerText = 'Actualizat la: ' + acum.toLocaleTimeString('ro-RO');
         });
 
         client.on('error', () => {
-            statusEl.innerText = '● Eroare conexiune';
+            statusEl.innerText = '● Eroare rețea';
             statusEl.style.color = '#f87171';
         });
     </script>
