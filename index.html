@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Date ESP32</title>
+    <!-- Bibliotecă MQTT pentru browser -->
+    <script src="https://unpkg.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .dashboard {
+            background-color: #1e293b;
+            padding: 35px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            width: 320px;
+            border: 1px solid #334155;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: bold;
+            background-color: #334155;
+            color: #fbbf24;
+            margin-bottom: 20px;
+        }
+        .titlu {
+            font-size: 15px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .valoare {
+            font-size: 52px;
+            font-weight: bold;
+            color: #38bdf8;
+            margin: 15px 0;
+        }
+        .timp {
+            font-size: 12px;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <div id="status" class="status-badge">Se conectează...</div>
+        <div class="titlu">Informație ESP32</div>
+        <div id="valoare-esp" class="valoare">--</div>
+        <div id="ora-update" class="timp">Nicio dată primită încă</div>
+    </div>
+
+    <script>
+        // IMPORTANT: Schimbă 'proiect_esp32_unic_123' cu un nume ales de tine!
+        const topic = 'proiect_esp32_unic_123/date';
+
+        // Conectare securizată (WSS) necesară pentru site-urile HTTPS de pe GitHub
+        const client = mqtt.connect('wss://broker.emqx.io:8084/mqtt');
+
+        const statusEl = document.getElementById('status');
+        const valoareEl = document.getElementById('valoare-esp');
+        const oraEl = document.getElementById('ora-update');
+
+        client.on('connect', () => {
+            statusEl.innerText = '● Online (Conectat)';
+            statusEl.style.color = '#4ade80';
+            client.subscribe(topic);
+        });
+
+        client.on('message', (topicPrimit, mesaj) => {
+            // Afișează textul sau numărul trimis de ESP32
+            valoareEl.innerText = mesaj.toString();
+            
+            const acum = new Date();
+            oraEl.innerText = 'Actualizat la: ' + acum.toLocaleTimeString('ro-RO');
+        });
+
+        client.on('error', () => {
+            statusEl.innerText = '● Eroare conexiune';
+            statusEl.style.color = '#f87171';
+        });
+    </script>
+
+</body>
+</html>
